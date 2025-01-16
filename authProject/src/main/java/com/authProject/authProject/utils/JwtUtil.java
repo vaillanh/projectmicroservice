@@ -23,7 +23,34 @@ public class JwtUtil {
                 .compact();
     }
 
+    public String extractUsername(String token) {
+        return extractClaim(token, Claims::getSubject);
+    }
 
+    public <T> T extractClaim(String token, ClaimsResolver<T> claimsResolver) {
+        final Claims claims = extractAllClaims(token);
+        return claimsResolver.resolve(claims);
+    }
+
+    private Claims extractAllClaims(String token) {
+        return Jwts.parser()
+                .setSigningKey(SECRET_KEY)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+    }
+
+    private Boolean isTokenExpired(String token) {
+        return extractExpiration(token).before(new Date());
+    }
+
+    private Date extractExpiration(String token) {
+        return extractClaim(token, Claims::getExpiration);
+    }
+
+    public Boolean validateToken(String token, String username) {
+        return (username.equals(extractUsername(token)) && !isTokenExpired(token));
+    }
 
     @FunctionalInterface
     public interface ClaimsResolver<T> {
