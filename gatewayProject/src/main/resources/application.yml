@@ -1,0 +1,29 @@
+spring:
+  application:
+    name: gatewayProject
+  cloud:
+    gateway:
+      routes:
+        - id: auth
+          uri: lb://authProject
+          predicates:
+            - Path=/auth/**
+        - id: first
+          uri: lb://studentProject
+          predicates:
+            - Path=/student/**
+        - id: second
+          uri: lb://school-service
+          predicates:
+            - Path=/schools/**
+server:
+  port: 8888
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+      register-with-eureka: true
+      fetch-registry: true
+  instance:
+    hostname: localhost
